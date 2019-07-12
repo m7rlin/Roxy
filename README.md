@@ -15,3 +15,14 @@ Software you need to run this project.
 
 - Minecraft: `1.14.3`
 - Forge: `1.14.3-forge-27.0.43`
+
+## Usage
+
+Automatically execute command `/cobblex` after 9 stacks of item.
+
+Default settings:
+
+> Keybindings can be changed in Minecraft controls.
+
+- start automining `*`(Numpad),
+- stop automining `-`(Numpad).

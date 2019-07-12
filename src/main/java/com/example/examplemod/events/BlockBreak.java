@@ -97,7 +97,7 @@ public class BlockBreak {
                     double y = pos.y;
                     double z = pos.z;
 
-                    double blockFail = 0.3;
+                    double blockFail = 0.5;
 
                     // blocks when in the front wall
                     BlockPos posBlockDown = new BlockPos(x+1,y,z-blockFail); // left block - down
