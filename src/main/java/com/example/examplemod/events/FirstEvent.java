@@ -32,7 +32,7 @@ public class FirstEvent {
             }
 
         } else {
-            fr.drawStringWithShadow("Roxy v1.0.0 by m7rlin ", 2, 2, -1);
+            fr.drawStringWithShadow("Roxy v1.1.0 by m7rlin ", 2, 2, -1);
         }
     }
 

@@ -19,6 +19,7 @@ Software you need to run this project.
 ## Usage
 
 Automatically execute command `/cobblex` after 9 stacks of item.
+Automatically place a torch when level light is less than 8.
 
 Default settings:
 

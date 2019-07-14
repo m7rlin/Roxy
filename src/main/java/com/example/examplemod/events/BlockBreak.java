@@ -1,20 +1,19 @@
 package com.example.examplemod.events;
 
 import com.example.examplemod.keybindings.StartStop;
-import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 
+import net.minecraft.item.Items;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
-
 import net.minecraft.util.text.StringTextComponent;
 
-
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
@@ -28,6 +27,7 @@ public class BlockBreak {
     KeyBinding left = mc.gameSettings.keyBindLeft;
 
     KeyBinding attack = mc.gameSettings.keyBindAttack;
+    KeyBinding defense = mc.gameSettings.keyBindUseItem;
 
 
     int turnInterval = 200;
@@ -38,6 +38,64 @@ public class BlockBreak {
     boolean work = false;
 
     boolean firstStart = true;
+
+    boolean torchShouldBePlaced = false;
+
+    double posXStart = 0;
+    double posZStart = 0;
+
+    double posXStop = 0;
+    double posZStop = 0;
+
+
+    // not working on server!!!!
+    /*@SubscribeEvent
+    public void onTorchPichup(EntityItemPickupEvent e) {
+
+        PlayerEntity p = e.getEntityPlayer();
+        ItemEntity item = e.getItem();
+        p.sendMessage(e.getItem().getName());
+
+        if (work) {
+            work = false;
+
+            // the item is torch
+            if (item.getItem().getItem() == Items.TORCH) {
+                this.stoptMining();
+                this.moveStop();
+
+
+                this.setPositionDown();
+                KeyBinding.setKeyBindState(defense.getKey(), true);
+                torchShouldBePlaced = true;
+            }
+            //e.getEntityPlayer().sendMessage(new StringTextComponent("TORCH pickedUp"));
+        }
+    }*/
+
+    @SubscribeEvent
+    public void onInteract(PlayerInteractEvent e) {
+        //e.getEntityPlayer().sendMessage(new StringTextComponent("Interaction"));
+        if (torchShouldBePlaced) {
+            PlayerEntity p = e.getEntityPlayer();
+            Vec3d pos = p.getPositionVector();
+
+            double x = pos.x;
+            double y = pos.y;
+            double z = pos.z;
+
+            BlockPos playerBlockDown = new BlockPos(x, y, z);
+            if (Item.getIdFromItem(e.getWorld().getBlockState(playerBlockDown).getBlock().asItem()) == Item.getIdFromItem(Items.TORCH)) {
+                KeyBinding.setKeyBindState(defense.getKey(), false);
+                work = true;
+                firstStart = true;
+                torchShouldBePlaced = false;
+                //e.getEntityPlayer().sendMessage(new StringTextComponent("Enabled"));
+            }
+
+            //e.getEntityPlayer().sendMessage(e.getWorld().getBlockState(playerBlockDown).getBlock().asItem().getName());
+        }
+    }
 
     @SubscribeEvent
     public void onUpdate(TickEvent.ClientTickEvent e) {
@@ -55,6 +113,7 @@ public class BlockBreak {
             this.stoptMining();
             this.moveStop();
             firstStart = true;
+            torchShouldBePlaced = false;
             p.sendMessage(new StringTextComponent("Roxy has been `disabled`."));
         }
 
@@ -68,6 +127,14 @@ public class BlockBreak {
             PlayerEntity p = e.player;
             Vec3d pos = p.getPositionVector();
 
+            BlockPos blockPos = new BlockPos(pos.x,pos.y,pos.z);
+
+            int lightLevel = p.world.getLight(blockPos);
+
+            //p.sendMessage(new StringTextComponent(Integer.toString(lightLevel)));
+
+
+
             if (firstStart && work) {
                 this.setPositionMining();
                 this.startMining();
@@ -77,6 +144,19 @@ public class BlockBreak {
 
 
             if (work) {
+
+                // the light level of the spawning block must be 7 or darker (with exception during thunderstorms), and more light increases the chance that the spawn will fail
+                if (lightLevel < 8) {
+                    work = false;
+                    this.stoptMining();
+                    this.moveStop();
+
+
+                    this.setPositionDown();
+                    KeyBinding.setKeyBindState(defense.getKey(), true);
+                    torchShouldBePlaced = true;
+                    return;
+                }
 
 
                 if (pos.x <= 800.5 && pos.x >= 800) {
